@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Sección de Título -->
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Panel del Operario"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            android:textColor="@color/textColorPrimary" />
+
+        <TextView
+            android:id="@+id/tv_welcome_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Bienvenido de nuevo, Operario."
+            android:textSize="18sp"
+            android:textColor="@color/textColorSecondary" />
+
+        <!-- GridLayout para las tarjetas de acción -->
+        <GridLayout
+            android:id="@+id/dashboard_grid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:columnCount="1"
+            android:useDefaultMargins="true">
+
+            <!-- Las tarjetas se añadirán aquí dinámicamente desde Java -->
+
+        </GridLayout>
+    </LinearLayout>
+</ScrollView>

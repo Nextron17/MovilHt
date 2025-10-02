@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/nav_home" android:icon="@drawable/ic_home" android:title="Inicio" />
+        <item android:id="@+id/nav_greenhouses" android:icon="@drawable/ic_sprout" android:title="Invernaderos" />
+        <item android:id="@+id/nav_crops" android:icon="@drawable/ic_package" android:title="Cultivos" />
+        <item android:id="@+id/nav_notifications" android:icon="@drawable/ic_notifications" android:title="Notificaciones" />
+        <item android:id="@+id/nav_log" android:icon="@drawable/ic_book_text" android:title="Bitácora" />
+    </group>
+    <group android:id="@+id/group_secondary" android:checkableBehavior="none">
+        <item android:id="@+id/nav_settings" android:icon="@drawable/ic_settings" android:title="Configuraciones" />
+        <item android:id="@+id/nav_logout" android:icon="@drawable/ic_logout" android:title="Cerrar Sesión" />
+    </group>
+</menu>

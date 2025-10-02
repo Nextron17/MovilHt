@@ -1,0 +1,217 @@
+package com.example.hortitechv1.view;
+
+import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.hortitechv1.R;
+import com.example.hortitechv1.models.ProgramacionIluminacion;
+import com.example.hortitechv1.network.ApiClient;
+import com.example.hortitechv1.network.ApiProIluminacion;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime; // [MANTENIDO para validación local]
+// Se quitan las importaciones de OffsetDateTime y ZoneOffset
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class FormProIluminacionActivity extends AppCompatActivity {
+
+    private EditText etDescripcion, etFechaInicio, etFechaFin;
+    private Button btnAccion, btnCancelar;
+    private TextView tvTitulo;
+    private ApiProIluminacion api;
+    private int idZona;
+    private int programacionId = -1;
+
+    // Formato sin segundos (yyyy-MM-dd HH:mm)
+    private final DateTimeFormatter apiFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    // SimpleDateFormat sin segundos para visualización
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_form_pro_iluminacion);
+
+        etDescripcion = findViewById(R.id.etP);
+        etFechaInicio = findViewById(R.id.etFechaInicio);
+        etFechaFin = findViewById(R.id.etFechaFin);
+        btnAccion = findViewById(R.id.btnCrear);
+        btnCancelar = findViewById(R.id.btnCancelarFormI);
+        tvTitulo = findViewById(R.id.tvTituloForm);
+
+        api = ApiClient.getClient().create(ApiProIluminacion.class);
+
+        idZona = getIntent().getIntExtra("zona_id", -1);
+        if (idZona == -1) {
+            Toast.makeText(this, "No se recibió el ID de la zona", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        programacionId = getIntent().getIntExtra("programacion_id", -1);
+        if (programacionId != -1) {
+            String descripcion = getIntent().getStringExtra("descripcion");
+            String fechaInicio = getIntent().getStringExtra("fecha_inicio");
+            String fechaFin = getIntent().getStringExtra("fecha_fin");
+
+            etDescripcion.setText(descripcion);
+            etFechaInicio.setText(fechaInicio);
+            etFechaFin.setText(fechaFin);
+
+            tvTitulo.setText("Editar Programación");
+            btnAccion.setText("Actualizar");
+        } else {
+            tvTitulo.setText("Crear Programación");
+            btnAccion.setText("Crear");
+        }
+
+        etFechaInicio.setOnClickListener(v -> mostrarDateTimePicker(etFechaInicio));
+        etFechaFin.setOnClickListener(v -> mostrarDateTimePicker(etFechaFin));
+
+        btnCancelar.setOnClickListener(v -> finish());
+
+        btnAccion.setOnClickListener(v -> {
+            if (programacionId == -1) {
+                crearProgramacion();
+            } else {
+                actualizarProgramacion();
+            }
+        });
+    }
+
+    private void mostrarDateTimePicker(final EditText editText) {
+        final Calendar calendar = Calendar.getInstance();
+
+        DatePickerDialog datePicker = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            TimePickerDialog timePicker = new TimePickerDialog(this, (timeView, hourOfDay, minute) -> {
+                calendar.set(year, month, dayOfMonth, hourOfDay, minute);
+                // Se quitan los segundos
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+
+                editText.setText(sdf.format(calendar.getTime()));
+
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true);
+            timePicker.show();
+
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+
+        // Mantiene la validación para no seleccionar fechas/horas en el pasado
+        datePicker.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+        datePicker.show();
+    }
+
+    private void crearProgramacion() {
+        String descripcion = etDescripcion.getText().toString().trim();
+        String fechaInicioStr = etFechaInicio.getText().toString().trim();
+        String fechaFinStr = etFechaFin.getText().toString().trim();
+
+        if (descripcion.isEmpty() || fechaInicioStr.isEmpty() || fechaFinStr.isEmpty()) {
+            Toast.makeText(this, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            // Se usa LocalDateTime para la validación local (inicio < fin)
+            LocalDateTime localFechaInicio = LocalDateTime.parse(fechaInicioStr, apiFormatter);
+            LocalDateTime localFechaFin = LocalDateTime.parse(fechaFinStr, apiFormatter);
+
+            if (localFechaFin.isBefore(localFechaInicio) || localFechaFin.isEqual(localFechaInicio)) {
+                Toast.makeText(this, "La fecha de fin debe ser posterior a la fecha de inicio.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            ProgramacionIluminacion programacion = new ProgramacionIluminacion();
+            programacion.setDescripcion(descripcion);
+            programacion.setFecha_inicio(fechaInicioStr); // [MODIFICADO] Envía como String
+            programacion.setFecha_finalizacion(fechaFinStr); // [MODIFICADO] Envía como String
+            programacion.setId_zona(idZona);
+            programacion.setEstado(true);
+
+            api.crearProgramacion(programacion).enqueue(new Callback<ProgramacionIluminacion>() {
+                @Override
+                public void onResponse(Call<ProgramacionIluminacion> call, Response<ProgramacionIluminacion> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(FormProIluminacionActivity.this, "Programación creada correctamente", Toast.LENGTH_SHORT).show();
+                        setResult(Activity.RESULT_OK);
+                        finish();
+                    } else {
+                        Toast.makeText(FormProIluminacionActivity.this, "Error al crear: " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ProgramacionIluminacion> call, Throwable t) {
+                    Toast.makeText(FormProIluminacionActivity.this, "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Formato de fecha incorrecto: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void actualizarProgramacion() {
+        String descripcion = etDescripcion.getText().toString().trim();
+        String fechaInicioStr = etFechaInicio.getText().toString().trim();
+        String fechaFinStr = etFechaFin.getText().toString().trim();
+
+        if (descripcion.isEmpty() || fechaInicioStr.isEmpty() || fechaFinStr.isEmpty()) {
+            Toast.makeText(this, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            LocalDateTime localFechaInicio = LocalDateTime.parse(fechaInicioStr, apiFormatter);
+            LocalDateTime localFechaFin = LocalDateTime.parse(fechaFinStr, apiFormatter);
+
+            if (localFechaFin.isBefore(localFechaInicio) || localFechaFin.isEqual(localFechaInicio)) {
+                Toast.makeText(this, "La fecha de fin debe ser posterior a la fecha de inicio.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            ProgramacionIluminacion programacion = new ProgramacionIluminacion();
+            programacion.setDescripcion(descripcion);
+            programacion.setFecha_inicio(fechaInicioStr); // [MODIFICADO] Envía como String
+            programacion.setFecha_finalizacion(fechaFinStr); // [MODIFICADO] Envía como String
+            programacion.setId_zona(idZona);
+            programacion.setEstado(true);
+
+            api.actualizarProgramacion(programacionId, programacion).enqueue(new Callback<ProgramacionIluminacion>() {
+                @Override
+                public void onResponse(Call<ProgramacionIluminacion> call, Response<ProgramacionIluminacion> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(FormProIluminacionActivity.this, "Programación actualizada correctamente", Toast.LENGTH_SHORT).show();
+                        setResult(Activity.RESULT_OK);
+                        finish();
+                    } else {
+                        Toast.makeText(FormProIluminacionActivity.this, "Error al actualizar: " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ProgramacionIluminacion> call, Throwable t) {
+                    Toast.makeText(FormProIluminacionActivity.this, "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Formato de fecha incorrecto: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+}
