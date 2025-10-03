@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.hortitechv1.R;
 import com.example.hortitechv1.models.ProgramacionIluminacion;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ProgramacionIlumiAdapter extends RecyclerView.Adapter<ProgramacionIlumiAdapter.ViewHolder> {
@@ -21,7 +23,9 @@ public class ProgramacionIlumiAdapter extends RecyclerView.Adapter<ProgramacionI
     private List<ProgramacionIluminacion> listaProgramaciones;
     private OnItemClickListener listener;
 
-    // Se eliminó la declaración de DateTimeFormatter
+    // Formateador para mostrar las fechas (como en el primer código)
+    private static final DateTimeFormatter OUTPUT_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public interface OnItemClickListener {
         void onActualizarClick(ProgramacionIluminacion programacion);
@@ -52,19 +56,11 @@ public class ProgramacionIlumiAdapter extends RecyclerView.Adapter<ProgramacionI
 
         holder.tvDescripcion.setText(p.getDescripcion() != null ? p.getDescripcion() : "");
 
-        // [CORREGIDO] Acceso directo al String
-        if (p.getFecha_inicio() != null) {
-            holder.tvFechaActivacion.setText("Inicio: " + p.getFecha_inicio());
-        } else {
-            holder.tvFechaActivacion.setText("Inicio: -");
-        }
+        // Fecha inicio
+        holder.tvFechaActivacion.setText("Inicio: " + formatearFecha(p.getFecha_inicio()));
 
-        // [CORREGIDO] Acceso directo al String
-        if (p.getFecha_finalizacion() != null) {
-            holder.tvFechaDesactivacion.setText("Fin: " + p.getFecha_finalizacion());
-        } else {
-            holder.tvFechaDesactivacion.setText("Fin: -");
-        }
+        // Fecha fin
+        holder.tvFechaDesactivacion.setText("Fin: " + formatearFecha(p.getFecha_finalizacion()));
 
         holder.btnActualizar.setOnClickListener(v -> listener.onActualizarClick(p));
         holder.btnDetener.setOnClickListener(v -> listener.onDetenerClick(p));
@@ -74,6 +70,14 @@ public class ProgramacionIlumiAdapter extends RecyclerView.Adapter<ProgramacionI
     @Override
     public int getItemCount() {
         return listaProgramaciones != null ? listaProgramaciones.size() : 0;
+    }
+
+    // Método para formatear la fecha desde OffsetDateTime
+    private String formatearFecha(OffsetDateTime fecha) {
+        if (fecha == null) {
+            return "-";
+        }
+        return fecha.format(OUTPUT_FORMATTER);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

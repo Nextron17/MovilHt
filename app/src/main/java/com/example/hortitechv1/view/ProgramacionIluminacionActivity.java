@@ -15,14 +15,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.hortitechv1.R;
 import com.example.hortitechv1.controllers.ProgramacionIlumiAdapter;
 import com.example.hortitechv1.models.ProgramacionIluminacion;
 import com.example.hortitechv1.network.ApiClient;
 import com.example.hortitechv1.network.ApiProIluminacion;
-// Se quita la importación de java.time.format.DateTimeFormatter
+
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -177,9 +180,17 @@ public class ProgramacionIluminacionActivity extends AppCompatActivity {
         intent.putExtra("programacion_id", p.getId_iluminacion());
         intent.putExtra("descripcion", p.getDescripcion());
 
-        // [CORREGIDO] Se pasa directamente el String
-        intent.putExtra("fecha_inicio", p.getFecha_inicio());
-        intent.putExtra("fecha_fin", p.getFecha_finalizacion());
+        // ✅ Adaptado: se envían en ISO 8601 usando OffsetDateTime (si existen)
+        OffsetDateTime inicio = p.getFecha_inicio();
+        if (inicio != null) {
+            intent.putExtra("fecha_inicio", inicio.toString());
+        }
+
+        OffsetDateTime fin = p.getFecha_finalizacion();
+        if (fin != null) {
+            intent.putExtra("fecha_fin", fin.toString());
+        }
+
         formLauncher.launch(intent);
     }
 }

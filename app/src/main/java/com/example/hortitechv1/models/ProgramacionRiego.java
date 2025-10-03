@@ -1,24 +1,25 @@
 package com.example.hortitechv1.models;
 
-// Se quitan las importaciones de java.time.LocalDateTime/OffsetDateTime
+import java.time.OffsetDateTime;
 
 public class ProgramacionRiego {
     private Integer id_pg_riego;
     private String descripcion;
     private String tipo_riego;
-    private String fecha_inicio; // [MODIFICADO]
-    private String fecha_finalizacion; // [MODIFICADO]
+    private OffsetDateTime fecha_inicio;
+    private OffsetDateTime fecha_finalizacion;
     private int id_zona;
     private boolean estado;
+    private OffsetDateTime created_at;
+    private OffsetDateTime updated_at;
 
-    private String created_at; // [MODIFICADO]
-    private String updated_at; // [MODIFICADO]
-
+    // Constructor vacío
     public ProgramacionRiego() {}
 
+    // Constructor con parámetros
     public ProgramacionRiego(Integer id_pg_riego, String descripcion, String tipo_riego,
-                             String fecha_inicio, String fecha_finalizacion, // [MODIFICADO]
-                             String created_at, String updated_at, // [MODIFICADO]
+                             OffsetDateTime fecha_inicio, OffsetDateTime fecha_finalizacion,
+                             OffsetDateTime created_at, OffsetDateTime updated_at,
                              int id_zona, boolean estado) {
         this.id_pg_riego = id_pg_riego;
         this.descripcion = descripcion;
@@ -51,7 +52,6 @@ public class ProgramacionRiego {
         return tipo_riego;
     }
 
-
     public void setTipo_riego(String tipo_riego) {
         if (tipo_riego == null) {
             this.tipo_riego = null;
@@ -68,19 +68,19 @@ public class ProgramacionRiego {
         }
     }
 
-    public String getFecha_inicio() { // [MODIFICADO]
+    public OffsetDateTime getFecha_inicio() {
         return fecha_inicio;
     }
 
-    public void setFecha_inicio(String fecha_inicio) { // [MODIFICADO]
+    public void setFecha_inicio(OffsetDateTime fecha_inicio) {
         this.fecha_inicio = fecha_inicio;
     }
 
-    public String getFecha_finalizacion() { // [MODIFICADO]
+    public OffsetDateTime getFecha_finalizacion() {
         return fecha_finalizacion;
     }
 
-    public void setFecha_finalizacion(String fecha_finalizacion) { // [MODIFICADO]
+    public void setFecha_finalizacion(OffsetDateTime fecha_finalizacion) {
         this.fecha_finalizacion = fecha_finalizacion;
     }
 
@@ -100,19 +100,19 @@ public class ProgramacionRiego {
         this.estado = estado;
     }
 
-    public String getCreated_at() { // [MODIFICADO]
+    public OffsetDateTime getCreated_at() {
         return created_at;
     }
 
-    public void setCreated_at(String created_at) { // [MODIFICADO]
+    public void setCreated_at(OffsetDateTime created_at) {
         this.created_at = created_at;
     }
 
-    public String getUpdated_at() { // [MODIFICADO]
+    public OffsetDateTime getUpdated_at() {
         return updated_at;
     }
 
-    public void setUpdated_at(String updated_at) { // [MODIFICADO]
+    public void setUpdated_at(OffsetDateTime updated_at) {
         this.updated_at = updated_at;
     }
 }

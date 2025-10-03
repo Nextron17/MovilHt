@@ -1,8 +1,8 @@
 package com.example.hortitechv1.view;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,12 +16,10 @@ import com.example.hortitechv1.models.ProgramacionIluminacion;
 import com.example.hortitechv1.network.ApiClient;
 import com.example.hortitechv1.network.ApiProIluminacion;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime; // [MANTENIDO para validación local]
-// Se quitan las importaciones de OffsetDateTime y ZoneOffset
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,11 +34,10 @@ public class FormProIluminacionActivity extends AppCompatActivity {
     private int idZona;
     private int programacionId = -1;
 
-    // Formato sin segundos (yyyy-MM-dd HH:mm)
-    private final DateTimeFormatter apiFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    // SimpleDateFormat sin segundos para visualización
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-
+    // Formato ISO para enviar al backend
+    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+    // Formato visible en pantalla
+    private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +67,17 @@ public class FormProIluminacionActivity extends AppCompatActivity {
             String fechaFin = getIntent().getStringExtra("fecha_fin");
 
             etDescripcion.setText(descripcion);
-            etFechaInicio.setText(fechaInicio);
-            etFechaFin.setText(fechaFin);
+
+            if (fechaInicio != null) {
+                OffsetDateTime inicio = OffsetDateTime.parse(fechaInicio, ISO_FORMATTER);
+                etFechaInicio.setText(inicio.format(DISPLAY_FORMATTER));
+                etFechaInicio.setTag(inicio.format(ISO_FORMATTER));
+            }
+            if (fechaFin != null) {
+                OffsetDateTime fin = OffsetDateTime.parse(fechaFin, ISO_FORMATTER);
+                etFechaFin.setText(fin.format(DISPLAY_FORMATTER));
+                etFechaFin.setTag(fin.format(ISO_FORMATTER));
+            }
 
             tvTitulo.setText("Editar Programación");
             btnAccion.setText("Actualizar");
@@ -83,7 +89,12 @@ public class FormProIluminacionActivity extends AppCompatActivity {
         etFechaInicio.setOnClickListener(v -> mostrarDateTimePicker(etFechaInicio));
         etFechaFin.setOnClickListener(v -> mostrarDateTimePicker(etFechaFin));
 
-        btnCancelar.setOnClickListener(v -> finish());
+        btnCancelar.setOnClickListener(v -> {
+            Intent intent = new Intent(FormProIluminacionActivity.this, ProgramacionIluminacionActivity.class);
+            intent.putExtra("zona_id", idZona);
+            startActivity(intent);
+            finish();
+        });
 
         btnAccion.setOnClickListener(v -> {
             if (programacionId == -1) {
@@ -94,124 +105,142 @@ public class FormProIluminacionActivity extends AppCompatActivity {
         });
     }
 
-    private void mostrarDateTimePicker(final EditText editText) {
+    private void mostrarDateTimePicker(EditText editText) {
         final Calendar calendar = Calendar.getInstance();
 
-        DatePickerDialog datePicker = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
-            TimePickerDialog timePicker = new TimePickerDialog(this, (timeView, hourOfDay, minute) -> {
-                calendar.set(year, month, dayOfMonth, hourOfDay, minute);
-                // Se quitan los segundos
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
+        DatePickerDialog datePicker = new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(Calendar.YEAR, year);
+                    calendar.set(Calendar.MONTH, month);
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                editText.setText(sdf.format(calendar.getTime()));
+                    TimePickerDialog timePicker = new TimePickerDialog(
+                            this,
+                            (timeView, hourOfDay, minute) -> {
+                                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                calendar.set(Calendar.MINUTE, minute);
 
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true);
-            timePicker.show();
+                                // Convertir Calendar a OffsetDateTime
+                                OffsetDateTime odt = calendar.toInstant()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toOffsetDateTime();
 
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+                                // Mostrar bonito
+                                editText.setText(odt.format(DISPLAY_FORMATTER));
+                                // Guardar ISO real en tag
+                                editText.setTag(odt.format(ISO_FORMATTER));
+                            },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            true
+                    );
+                    timePicker.show();
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
 
-        // Mantiene la validación para no seleccionar fechas/horas en el pasado
-        datePicker.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
         datePicker.show();
     }
 
     private void crearProgramacion() {
         String descripcion = etDescripcion.getText().toString().trim();
-        String fechaInicioStr = etFechaInicio.getText().toString().trim();
-        String fechaFinStr = etFechaFin.getText().toString().trim();
+        String fechaInicioIso = etFechaInicio.getTag() != null ? etFechaInicio.getTag().toString() : "";
+        String fechaFinIso = etFechaFin.getTag() != null ? etFechaFin.getTag().toString() : "";
 
-        if (descripcion.isEmpty() || fechaInicioStr.isEmpty() || fechaFinStr.isEmpty()) {
+        if (descripcion.isEmpty() || fechaInicioIso.isEmpty() || fechaFinIso.isEmpty()) {
             Toast.makeText(this, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        try {
-            // Se usa LocalDateTime para la validación local (inicio < fin)
-            LocalDateTime localFechaInicio = LocalDateTime.parse(fechaInicioStr, apiFormatter);
-            LocalDateTime localFechaFin = LocalDateTime.parse(fechaFinStr, apiFormatter);
+        OffsetDateTime inicio = OffsetDateTime.parse(fechaInicioIso, ISO_FORMATTER);
+        OffsetDateTime fin = OffsetDateTime.parse(fechaFinIso, ISO_FORMATTER);
 
-            if (localFechaFin.isBefore(localFechaInicio) || localFechaFin.isEqual(localFechaInicio)) {
-                Toast.makeText(this, "La fecha de fin debe ser posterior a la fecha de inicio.", Toast.LENGTH_LONG).show();
-                return;
+        if (!fin.isAfter(inicio)) {
+            Toast.makeText(this, "La fecha de fin debe ser posterior a la fecha de inicio.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        ProgramacionIluminacion programacion = new ProgramacionIluminacion();
+        programacion.setDescripcion(descripcion);
+        programacion.setFecha_inicio(inicio);
+        programacion.setFecha_finalizacion(fin);
+        programacion.setId_zona(idZona);
+        programacion.setEstado(true);
+
+        api.crearProgramacion(programacion).enqueue(new Callback<ProgramacionIluminacion>() {
+            @Override
+            public void onResponse(Call<ProgramacionIluminacion> call, Response<ProgramacionIluminacion> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(FormProIluminacionActivity.this,
+                            "Programación creada correctamente", Toast.LENGTH_SHORT).show();
+                    volverALista();
+                } else {
+                    Toast.makeText(FormProIluminacionActivity.this,
+                            "Error al crear: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
 
-            ProgramacionIluminacion programacion = new ProgramacionIluminacion();
-            programacion.setDescripcion(descripcion);
-            programacion.setFecha_inicio(fechaInicioStr); // [MODIFICADO] Envía como String
-            programacion.setFecha_finalizacion(fechaFinStr); // [MODIFICADO] Envía como String
-            programacion.setId_zona(idZona);
-            programacion.setEstado(true);
-
-            api.crearProgramacion(programacion).enqueue(new Callback<ProgramacionIluminacion>() {
-                @Override
-                public void onResponse(Call<ProgramacionIluminacion> call, Response<ProgramacionIluminacion> response) {
-                    if (response.isSuccessful()) {
-                        Toast.makeText(FormProIluminacionActivity.this, "Programación creada correctamente", Toast.LENGTH_SHORT).show();
-                        setResult(Activity.RESULT_OK);
-                        finish();
-                    } else {
-                        Toast.makeText(FormProIluminacionActivity.this, "Error al crear: " + response.code(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ProgramacionIluminacion> call, Throwable t) {
-                    Toast.makeText(FormProIluminacionActivity.this, "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
-
-        } catch (Exception e) {
-            Toast.makeText(this, "Formato de fecha incorrecto: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+            @Override
+            public void onFailure(Call<ProgramacionIluminacion> call, Throwable t) {
+                Toast.makeText(FormProIluminacionActivity.this,
+                        "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void actualizarProgramacion() {
         String descripcion = etDescripcion.getText().toString().trim();
-        String fechaInicioStr = etFechaInicio.getText().toString().trim();
-        String fechaFinStr = etFechaFin.getText().toString().trim();
+        String fechaInicioIso = etFechaInicio.getTag() != null ? etFechaInicio.getTag().toString() : "";
+        String fechaFinIso = etFechaFin.getTag() != null ? etFechaFin.getTag().toString() : "";
 
-        if (descripcion.isEmpty() || fechaInicioStr.isEmpty() || fechaFinStr.isEmpty()) {
+        if (descripcion.isEmpty() || fechaInicioIso.isEmpty() || fechaFinIso.isEmpty()) {
             Toast.makeText(this, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        try {
-            LocalDateTime localFechaInicio = LocalDateTime.parse(fechaInicioStr, apiFormatter);
-            LocalDateTime localFechaFin = LocalDateTime.parse(fechaFinStr, apiFormatter);
+        OffsetDateTime inicio = OffsetDateTime.parse(fechaInicioIso, ISO_FORMATTER);
+        OffsetDateTime fin = OffsetDateTime.parse(fechaFinIso, ISO_FORMATTER);
 
-            if (localFechaFin.isBefore(localFechaInicio) || localFechaFin.isEqual(localFechaInicio)) {
-                Toast.makeText(this, "La fecha de fin debe ser posterior a la fecha de inicio.", Toast.LENGTH_LONG).show();
-                return;
+        if (!fin.isAfter(inicio)) {
+            Toast.makeText(this, "La fecha de fin debe ser posterior a la fecha de inicio.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        ProgramacionIluminacion programacion = new ProgramacionIluminacion();
+        programacion.setDescripcion(descripcion);
+        programacion.setFecha_inicio(inicio);
+        programacion.setFecha_finalizacion(fin);
+        programacion.setId_zona(idZona);
+        programacion.setEstado(true);
+
+        api.actualizarProgramacion(programacionId, programacion).enqueue(new Callback<ProgramacionIluminacion>() {
+            @Override
+            public void onResponse(Call<ProgramacionIluminacion> call, Response<ProgramacionIluminacion> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(FormProIluminacionActivity.this,
+                            "Programación actualizada correctamente", Toast.LENGTH_SHORT).show();
+                    volverALista();
+                } else {
+                    Toast.makeText(FormProIluminacionActivity.this,
+                            "Error al actualizar: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
 
-            ProgramacionIluminacion programacion = new ProgramacionIluminacion();
-            programacion.setDescripcion(descripcion);
-            programacion.setFecha_inicio(fechaInicioStr); // [MODIFICADO] Envía como String
-            programacion.setFecha_finalizacion(fechaFinStr); // [MODIFICADO] Envía como String
-            programacion.setId_zona(idZona);
-            programacion.setEstado(true);
+            @Override
+            public void onFailure(Call<ProgramacionIluminacion> call, Throwable t) {
+                Toast.makeText(FormProIluminacionActivity.this,
+                        "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
-            api.actualizarProgramacion(programacionId, programacion).enqueue(new Callback<ProgramacionIluminacion>() {
-                @Override
-                public void onResponse(Call<ProgramacionIluminacion> call, Response<ProgramacionIluminacion> response) {
-                    if (response.isSuccessful()) {
-                        Toast.makeText(FormProIluminacionActivity.this, "Programación actualizada correctamente", Toast.LENGTH_SHORT).show();
-                        setResult(Activity.RESULT_OK);
-                        finish();
-                    } else {
-                        Toast.makeText(FormProIluminacionActivity.this, "Error al actualizar: " + response.code(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ProgramacionIluminacion> call, Throwable t) {
-                    Toast.makeText(FormProIluminacionActivity.this, "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
-
-        } catch (Exception e) {
-            Toast.makeText(this, "Formato de fecha incorrecto: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+    private void volverALista() {
+        Intent intent = new Intent(FormProIluminacionActivity.this, ProgramacionIluminacionActivity.class);
+        intent.putExtra("zona_id", idZona);
+        startActivity(intent);
+        finish();
     }
 }
