@@ -1,6 +1,7 @@
 package com.example.hortitechv1.controllers;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.hortitechv1.R;
@@ -23,7 +25,6 @@ public class ProgramacionRiegoAdapter extends RecyclerView.Adapter<ProgramacionR
     private List<ProgramacionRiego> listaProgramaciones;
     private OnItemClickListener listener;
 
-    // Formateador de fechas
     private static final DateTimeFormatter OUTPUT_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -31,6 +32,7 @@ public class ProgramacionRiegoAdapter extends RecyclerView.Adapter<ProgramacionR
         void onActualizarClick(ProgramacionRiego programacion);
         void onDetenerClick(ProgramacionRiego programacion);
         void onEliminarClick(ProgramacionRiego programacion);
+        void onReanudarClick(ProgramacionRiego programacion);
     }
 
     public ProgramacionRiegoAdapter(Context context, List<ProgramacionRiego> listaProgramaciones, OnItemClickListener listener) {
@@ -54,22 +56,40 @@ public class ProgramacionRiegoAdapter extends RecyclerView.Adapter<ProgramacionR
     public void onBindViewHolder(@NonNull ProgramacionRiegoAdapter.ViewHolder holder, int position) {
         ProgramacionRiego p = listaProgramaciones.get(position);
 
-        // Descripción
         holder.tvDescripcion.setText(p.getDescripcion() != null ? p.getDescripcion() : "");
-
-        // Fecha inicio
         holder.tvFechaActivacion.setText("Inicio: " + formatearFecha(p.getFecha_inicio()));
-
-        // Fecha fin
         holder.tvFechaDesactivacion.setText("Fin: " + formatearFecha(p.getFecha_finalizacion()));
-
-        // Tipo de riego
         holder.tvTipoRiego.setText("Tipo: " + (p.getTipo_riego() != null ? p.getTipo_riego() : "-"));
 
+        // Lógica para cambiar la UI según el estado
+        if (p.isEstado()) { // --> CORREGIDO: Se usa isEstado()
+            // Estado ACTIVO
+            holder.btnDetener.setVisibility(View.VISIBLE);
+            holder.btnReanudar.setVisibility(View.GONE);
+
+            holder.btnEditar.setEnabled(false);
+            holder.btnEliminar.setEnabled(false);
+
+            holder.btnEditar.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gris_desactivado)));
+            holder.btnEliminar.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gris_desactivado)));
+
+        } else {
+            // Estado INACTIVO
+            holder.btnDetener.setVisibility(View.GONE);
+            holder.btnReanudar.setVisibility(View.VISIBLE);
+
+            holder.btnEditar.setEnabled(true);
+            holder.btnEliminar.setEnabled(true);
+
+            holder.btnEditar.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.azul_editar)));
+            holder.btnEliminar.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.rojo_eliminar)));
+        }
+
         // Listeners de botones
-        holder.btnActualizar.setOnClickListener(v -> listener.onActualizarClick(p));
+        holder.btnEditar.setOnClickListener(v -> listener.onActualizarClick(p));
         holder.btnDetener.setOnClickListener(v -> listener.onDetenerClick(p));
         holder.btnEliminar.setOnClickListener(v -> listener.onEliminarClick(p));
+        holder.btnReanudar.setOnClickListener(v -> listener.onReanudarClick(p));
     }
 
     @Override
@@ -77,7 +97,6 @@ public class ProgramacionRiegoAdapter extends RecyclerView.Adapter<ProgramacionR
         return listaProgramaciones != null ? listaProgramaciones.size() : 0;
     }
 
-    // Método para formatear las fechas
     private String formatearFecha(OffsetDateTime fecha) {
         if (fecha == null) {
             return "-";
@@ -87,7 +106,7 @@ public class ProgramacionRiegoAdapter extends RecyclerView.Adapter<ProgramacionR
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvFechaActivacion, tvFechaDesactivacion, tvDescripcion, tvTipoRiego;
-        Button btnDetener, btnActualizar, btnEliminar;
+        Button btnDetener, btnEditar, btnEliminar, btnReanudar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -95,9 +114,11 @@ public class ProgramacionRiegoAdapter extends RecyclerView.Adapter<ProgramacionR
             tvFechaDesactivacion = itemView.findViewById(R.id.tvFechaDesactivacionRiego);
             tvDescripcion = itemView.findViewById(R.id.tvDescripcionProgramacionRiego);
             tvTipoRiego = itemView.findViewById(R.id.tvTipoRiegoProgramacionRiego);
+
             btnDetener = itemView.findViewById(R.id.btnDetenerRiego);
-            btnActualizar = itemView.findViewById(R.id.btnActualizarRiego);
+            btnEditar = itemView.findViewById(R.id.btnEditarRiego);
             btnEliminar = itemView.findViewById(R.id.btnEliminarRiego);
+            btnReanudar = itemView.findViewById(R.id.btnReanudarRiego);
         }
     }
 }

@@ -27,9 +27,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.hortitechv1.R;
 import com.example.hortitechv1.controllers.NotificacionAdapter;
 import com.example.hortitechv1.controllers.SessionManager;
-import com.example.hortitechv1.models.Notificaciones; // O Notificaciones, según lo tengas nombrado
+import com.example.hortitechv1.models.Notificaciones;
 import com.example.hortitechv1.network.ApiClient;
-import com.example.hortitechv1.network.ApiNotificaciones; // O ApiNotificaciones
+import com.example.hortitechv1.network.ApiNotificaciones;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -39,13 +39,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+// PASO 1: Implementar la interfaz para el menú de navegación
 public class NotificacionesActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView rvNotificaciones;
     private NotificacionAdapter adapter;
-    private List<Notificaciones> listaDeNotificaciones = new ArrayList<>(); // Asegúrate que el tipo sea el correcto
+    private List<Notificaciones> listaDeNotificaciones = new ArrayList<>();
     private TextView tvSinNotificaciones;
     private SessionManager sessionManager;
+
+    // PASO 2: Declarar las variables para el DrawerLayout
     private DrawerLayout drawerLayout;
     private LinearLayout mainContentContainer;
     private static final float END_SCALE = 0.8f;
@@ -54,36 +57,30 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notificaciones);
+
         sessionManager = new SessionManager(this);
 
+        // --- INICIO: CÓDIGO AÑADIDO PARA EL SIDEBAR ---
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         drawerLayout = findViewById(R.id.drawer_layout);
-        mainContentContainer = findViewById(R.id.main_content_container);
-
+        mainContentContainer = findViewById(R.id.main_content_container); // Asegúrate de que el contenedor principal tenga este ID en tu XML
         NavigationView navigationView = findViewById(R.id.navigation_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
         setupDrawerAnimation(toolbar);
+        navigationView.setNavigationItemSelectedListener(this);
         styleLogoutMenuItem(navigationView.getMenu());
-        navigationView.setCheckedItem(R.id.nav_settings); // Puede que quieras cambiar esto dependiendo de la lógica
+        // Opcional: marca un ítem del menú como seleccionado, por ejemplo el de bitácora/notificaciones
+        // navigationView.setCheckedItem(R.id.nav_log);
+        // --- FIN: CÓDIGO AÑADIDO PARA EL SIDEBAR ---
+
 
         rvNotificaciones = findViewById(R.id.rvNotificaciones);
         tvSinNotificaciones = findViewById(R.id.tvSinNotificaciones);
-
         rvNotificaciones.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new NotificacionAdapter(this, listaDeNotificaciones); // Asegúrate que el adapter acepte el tipo de lista correcto
+        adapter = new NotificacionAdapter(listaDeNotificaciones);
         rvNotificaciones.setAdapter(adapter);
-
-        // --- CAMBIO ---
-        // La llamada a la API ya no se hace aquí para poder refrescar la lista.
-        // cargarNotificacionesDesdeApi();
     }
 
-    // +++ MÉTODO AÑADIDO +++
-    // onResume se ejecuta cada vez que la actividad se muestra en pantalla.
-    // Es el lugar ideal para asegurar que los datos estén siempre actualizados.
     @Override
     protected void onResume() {
         super.onResume();
@@ -91,20 +88,19 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
     }
 
     private void cargarNotificacionesDesdeApi() {
-        int userIdInt = sessionManager.getUserId();
-
-        if (userIdInt == -1) {
-            Toast.makeText(this, "Error: No se pudo identificar al usuario.", Toast.LENGTH_SHORT).show();
+        String authToken = sessionManager.getAuthToken();
+        if (authToken == null) {
+            Toast.makeText(this, "Error: Sesión no válida.", Toast.LENGTH_SHORT).show();
+            sessionManager.logoutUser(); // Redirigir al login si no hay token
             return;
         }
 
-        String userIdString = String.valueOf(userIdInt);
-
         ApiNotificaciones api = ApiClient.getClient().create(ApiNotificaciones.class);
-        Call<List<Notificaciones>> call = api.getNotificaciones(sessionManager.getAuthToken(), userIdString);
+        Call<List<Notificaciones>> call = api.getNotificacionesOperario("Bearer " + authToken);
+
         call.enqueue(new Callback<List<Notificaciones>>() {
             @Override
-            public void onResponse(Call<List<Notificaciones>> call, Response<List<Notificaciones>> response) {
+            public void onResponse(@NonNull Call<List<Notificaciones>> call, @NonNull Response<List<Notificaciones>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     listaDeNotificaciones.clear();
                     listaDeNotificaciones.addAll(response.body());
@@ -121,9 +117,8 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
                     Toast.makeText(NotificacionesActivity.this, "Error al cargar notificaciones: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
-            public void onFailure(Call<List<Notificaciones>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Notificaciones>> call, @NonNull Throwable t) {
                 tvSinNotificaciones.setVisibility(View.VISIBLE);
                 rvNotificaciones.setVisibility(View.GONE);
                 Toast.makeText(NotificacionesActivity.this, "Fallo de conexión", Toast.LENGTH_SHORT).show();
@@ -131,7 +126,7 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
         });
     }
 
-    // --- El resto de tus métodos no cambian ---
+    // --- PASO 3: AÑADIR TODOS LOS MÉTODOS DEL SIDEBAR DE PERFILACTIVITY ---
 
     private void setupDrawerAnimation(Toolbar toolbar) {
         drawerLayout.setScrimColor(Color.TRANSPARENT);
@@ -153,6 +148,7 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
+        // Usamos un delay para que la animación del drawer no se corte
         new android.os.Handler().postDelayed(() -> {
             if (itemId == R.id.nav_home) {
                 startActivity(new Intent(NotificacionesActivity.this, HomeActivity.class));
@@ -160,8 +156,12 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
                 startActivity(new Intent(NotificacionesActivity.this, InvernaderoActivity.class));
             } else if (itemId == R.id.nav_crops) {
                 startActivity(new Intent(NotificacionesActivity.this, CultivosActivity.class));
+            } else if (itemId == R.id.nav_settings) {
+                startActivity(new Intent(NotificacionesActivity.this, PerfilActivity.class));
             } else if (itemId == R.id.nav_log) {
-                startActivity(new Intent(NotificacionesActivity.this, BitacoraActivity.class));
+                // Si ya estamos aquí, solo cerramos el drawer
+                // O si es una actividad diferente, iniciamos el intent
+                // startActivity(new Intent(NotificacionesActivity.this, BitacoraActivity.class));
             }
         }, 250);
 

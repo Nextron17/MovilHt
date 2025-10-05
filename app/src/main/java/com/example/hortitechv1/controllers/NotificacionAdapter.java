@@ -16,17 +16,15 @@ import java.util.List;
 public class NotificacionAdapter extends RecyclerView.Adapter<NotificacionAdapter.ViewHolder> {
 
     private final List<Notificaciones> notificaciones;
-    private final Context context;
 
-    public NotificacionAdapter(Context context, List<Notificaciones> notificaciones) {
-        this.context = context;
+    public NotificacionAdapter(List<Notificaciones> notificaciones) {
         this.notificaciones = notificaciones;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_notificacion, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notificacion, parent, false);
         return new ViewHolder(view);
     }
 
@@ -36,15 +34,12 @@ public class NotificacionAdapter extends RecyclerView.Adapter<NotificacionAdapte
 
         holder.tvTitulo.setText(notificacion.getTitulo());
         holder.tvMensaje.setText(notificacion.getMensaje());
-        holder.tvTimestamp.setText(notificacion.getTimestamp_envio());
+        holder.tvTimestamp.setText(notificacion.getTimestamp()); // Usar el campo correcto
 
-        // Lógica para marcar visualmente si una notificación fue leída
         if (notificacion.isLeido()) {
-            // Si está leída, ocultamos el punto y ponemos el texto en normal
             holder.puntoNoLeido.setVisibility(View.GONE);
             holder.tvTitulo.setTypeface(null, Typeface.NORMAL);
         } else {
-            // Si NO está leída, mostramos el punto y ponemos el título en negrita
             holder.puntoNoLeido.setVisibility(View.VISIBLE);
             holder.tvTitulo.setTypeface(null, Typeface.BOLD);
         }
@@ -69,5 +64,4 @@ public class NotificacionAdapter extends RecyclerView.Adapter<NotificacionAdapte
             puntoNoLeido = itemView.findViewById(R.id.viewPuntoNoLeido);
         }
     }
-
 }

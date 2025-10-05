@@ -17,6 +17,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
+import retrofit2.http.Path;
 
 public interface ApiUsuario {
     @POST("api/auth/login")
@@ -38,9 +39,11 @@ public interface ApiUsuario {
     Call<ResponseBody> resetPassword(@Body ResetPasswordRequest resetPasswordRequest);
 
     @Multipart
-    @POST("api/user/profile/photo") // Asegúrate que esta ruta coincida con tu backend
+    @POST("api/users/{id_persona}/upload-photo")
     Call<Persona> uploadProfilePicture(
             @Header("Authorization") String authToken,
+            @Path("id_persona") int id_persona,
             @Part MultipartBody.Part profile_picture
     );
+
 }

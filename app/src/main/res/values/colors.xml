@@ -63,8 +63,12 @@
     <color name="cultivo_icono_humedad">#0EA5E9</color>
 
 
-    <!-- Colores para la barra de importancia de la bitácora -->
-    <color name="color_alta">#EF4444</color>   <!-- Rojo -->
-    <color name="color_media">#F59E0B</color>  <!-- Ámbar -->
-    <color name="color_baja">#3B82F6</color>   <!-- Azul -->
+    <color name="color_alta">#EF4444</color>
+    <color name="color_media">#F59E0B</color>
+    <color name="color_baja">#3B82F6</color>
+    <color name="amarillo_detener">#FFC107</color>
+    <color name="verde_reanudar">#4CAF50</color>
+    <color name="azul_editar">#009688</color>
+    <color name="rojo_eliminar">#F44336</color>
+    <color name="gris_desactivado">#BDBDBD</color>
 </resources>

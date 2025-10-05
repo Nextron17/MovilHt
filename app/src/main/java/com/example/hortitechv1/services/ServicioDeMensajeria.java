@@ -7,21 +7,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
-
 import com.example.hortitechv1.R;
 import com.example.hortitechv1.controllers.SessionManager;
-import com.example.hortitechv1.models.TokenRequest;
+import com.example.hortitechv1.models.FcmTokenRequest; // ✨ CAMBIO: Usamos el modelo correcto
 import com.example.hortitechv1.network.ApiClient;
-import com.example.hortitechv1.network.ApiNotificaciones; // O ApiNotificaciones, según lo tengas nombrado
+import com.example.hortitechv1.network.ApiNotificaciones;
 import com.example.hortitechv1.view.NotificacionesActivity;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,24 +30,18 @@ public class ServicioDeMensajeria extends FirebaseMessagingService {
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
         Log.d(TAG, "Nuevo token generado: " + token);
-        enviarToken(this, token);
+        // Intentamos enviar el token si el usuario ya ha iniciado sesión
+        enviarTokenAlServidor(getApplicationContext(), token);
     }
 
-    // --- MÉTODO MODIFICADO ---
-    // Ahora lee desde "getData()" para funcionar siempre.
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-
         Log.d(TAG, "Mensaje recibido desde: " + remoteMessage.getFrom());
 
-        // Verificamos si el mensaje contiene un payload de "data"
         if (remoteMessage.getData().size() > 0) {
-            // Obtenemos el título y el cuerpo desde el mapa de datos
             String titulo = remoteMessage.getData().get("title");
             String cuerpo = remoteMessage.getData().get("body");
-
-            // Nos aseguramos de que no sean nulos antes de mostrar la notificación
             if (titulo != null && cuerpo != null) {
                 mostrarNotificacion(titulo, cuerpo);
             }
@@ -65,38 +55,40 @@ public class ServicioDeMensajeria extends FirebaseMessagingService {
                         Log.w(TAG, "Fetching FCM registration token failed", task.getException());
                         return;
                     }
-                    // Obtener el token actual
                     String token = task.getResult();
                     Log.d(TAG, "Token obtenido manualmente: " + token);
-                    enviarToken(context, token);
+                    enviarTokenAlServidor(context, token);
                 });
     }
 
-    private static void enviarToken(Context context, String token) {
+    // --- ✨ MÉTODO UNIFICADO Y CORREGIDO ---
+    private static void enviarTokenAlServidor(Context context, String token) {
         SessionManager sessionManager = new SessionManager(context);
-        int userIdInt = sessionManager.getUserId();
+        String authToken = sessionManager.getAuthToken();
 
-        if (userIdInt == -1) {
-            Log.w(TAG, "Usuario no logueado. El token no se enviará.");
+        if (authToken == null || token == null) {
+            Log.w(TAG, "Usuario no logueado o token nulo. El token no se enviará.");
             return;
         }
 
-        String userIdString = String.valueOf(userIdInt);
-        ApiNotificaciones api = ApiClient.getClient().create(ApiNotificaciones.class); // O ApiNotificaciones
-        TokenRequest requestBody = new TokenRequest(userIdString, token);
-        Call<ResponseBody> call = api.registrarToken(requestBody);
+        ApiNotificaciones api = ApiClient.getClient().create(ApiNotificaciones.class);
+        FcmTokenRequest requestBody = new FcmTokenRequest(token);
 
-        call.enqueue(new Callback<ResponseBody>() {
+        // Usamos el método correcto de la interfaz: sendFcmToken
+        Call<Void> call = api.sendFcmToken("Bearer " + authToken, requestBody);
+
+        call.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
                     Log.d(TAG, "Token registrado en el backend exitosamente.");
                 } else {
                     Log.e(TAG, "Error al registrar el token. Código: " + response.code());
                 }
             }
+
             @Override
-            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 Log.e(TAG, "Fallo de conexión al registrar el token.", t);
             }
         });
@@ -124,7 +116,6 @@ public class ServicioDeMensajeria extends FirebaseMessagingService {
                     channelId, "Alertas de Cultivo", NotificationManager.IMPORTANCE_HIGH);
             manager.createNotificationChannel(channel);
         }
-
         manager.notify((int) System.currentTimeMillis(), builder.build());
     }
 }

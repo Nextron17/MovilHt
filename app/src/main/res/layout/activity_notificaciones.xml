@@ -83,4 +83,5 @@
         app:itemIconTint="@color/nav_item_color_selector"
         app:itemBackground="@drawable/nav_item_background"
         app:menu="@menu/nav_menu" />
+
 </androidx.drawerlayout.widget.DrawerLayout>

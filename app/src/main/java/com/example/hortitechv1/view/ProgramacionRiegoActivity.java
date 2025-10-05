@@ -29,27 +29,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Pantalla principal para gestionar la programación de riego de una zona.
- * Permite listar, crear, actualizar, detener y eliminar programaciones.
- */
 public class ProgramacionRiegoActivity extends AppCompatActivity {
 
-    // UI
     private RecyclerView recyclerView;
     private Button btnNueva;
-
-    // Adaptador y datos
     private ProgramacionRiegoAdapter adapter;
     private final List<ProgramacionRiego> listaProgramaciones = new ArrayList<>();
-
-    // API
     private ApiProRiego api;
-
-    // Identificador de la zona recibido por Intent
     private int idZona;
 
-    // Lanzador para formulario (crear/editar)
     private final ActivityResultLauncher<Intent> formLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -64,19 +52,15 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_programacion_riego);
 
-        // Configurar toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Inicializar vistas
         recyclerView = findViewById(R.id.rvProgramacionRiego);
         btnNueva = findViewById(R.id.btnNuevaProgramacionRiego);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Inicializar API
         api = ApiClient.getClient().create(ApiProRiego.class);
 
-        // Configurar adaptador con listeners de acciones
         adapter = new ProgramacionRiegoAdapter(this, listaProgramaciones, new ProgramacionRiegoAdapter.OnItemClickListener() {
             @Override
             public void onActualizarClick(ProgramacionRiego programacion) {
@@ -92,10 +76,15 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
             public void onEliminarClick(ProgramacionRiego programacion) {
                 mostrarDialogoEliminar(programacion);
             }
+
+            // --> AÑADIDO
+            @Override
+            public void onReanudarClick(ProgramacionRiego programacion) {
+                reanudarProgramacion(programacion);
+            }
         });
         recyclerView.setAdapter(adapter);
 
-        // Obtener id de la zona desde Intent
         idZona = getIntent().getIntExtra("zona_id", -1);
         if (idZona != -1) {
             getProgramacionesFuturas();
@@ -103,7 +92,6 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
             Toast.makeText(this, "No se recibió el ID de la zona", Toast.LENGTH_SHORT).show();
         }
 
-        // Acción botón "Nueva Programación"
         btnNueva.setOnClickListener(v -> {
             Intent intent = new Intent(this, FormProRiegoActivity.class);
             intent.putExtra("zona_id", idZona);
@@ -111,9 +99,6 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Consulta las programaciones futuras desde la API.
-     */
     private void getProgramacionesFuturas() {
         api.getProgramacionesFuturas(idZona).enqueue(new Callback<List<ProgramacionRiego>>() {
             @Override
@@ -139,9 +124,6 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Mostrar diálogo de confirmación para eliminar una programación.
-     */
     private void mostrarDialogoEliminar(ProgramacionRiego p) {
         new AlertDialog.Builder(this)
                 .setTitle("Confirmar Eliminación")
@@ -152,9 +134,6 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
                 .show();
     }
 
-    /**
-     * Mostrar diálogo de confirmación para detener una programación.
-     */
     private void mostrarDialogoDetener(ProgramacionRiego p) {
         new AlertDialog.Builder(this)
                 .setTitle("Confirmar Detención")
@@ -165,9 +144,35 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
                 .show();
     }
 
-    /**
-     * Llama a la API para detener una programación (cambiar estado a inactivo).
-     */
+    // --> AÑADIDO: Llama a la API para reanudar una programación
+    private void reanudarProgramacion(ProgramacionRiego p) {
+        ProgramacionRiego programacionConEstado = new ProgramacionRiego();
+        programacionConEstado.setEstado(true); // Cambiar a activo
+
+        api.cambiarEstadoProgramacion(p.getId_pg_riego(), programacionConEstado)
+                .enqueue(new Callback<ProgramacionRiego>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ProgramacionRiego> call,
+                                           @NonNull Response<ProgramacionRiego> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(ProgramacionRiegoActivity.this,
+                                    "Programación reanudada", Toast.LENGTH_SHORT).show();
+                            getProgramacionesFuturas();
+                        } else {
+                            Toast.makeText(ProgramacionRiegoActivity.this,
+                                    "No se pudo reanudar", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ProgramacionRiego> call, @NonNull Throwable t) {
+                        Toast.makeText(ProgramacionRiegoActivity.this,
+                                "Error: " + t.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
     private void detenerProgramacion(ProgramacionRiego p) {
         ProgramacionRiego programacionConEstado = new ProgramacionRiego();
         programacionConEstado.setEstado(false);
@@ -196,9 +201,6 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Llama a la API para eliminar una programación.
-     */
     private void eliminarProgramacion(ProgramacionRiego p) {
         api.eliminarProgramacion(p.getId_pg_riego()).enqueue(new Callback<Void>() {
             @Override
@@ -222,17 +224,14 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Abre el formulario de edición con los datos de la programación seleccionada.
-     */
     private void actualizarProgramacion(ProgramacionRiego p) {
         Intent intent = new Intent(this, FormProRiegoActivity.class);
         intent.putExtra("zona_id", idZona);
         intent.putExtra("programacion_id", p.getId_pg_riego());
         intent.putExtra("descripcion", p.getDescripcion());
         intent.putExtra("tipo_riego", p.getTipo_riego());
-        intent.putExtra("fecha_inicio", p.getFecha_inicio());
-        intent.putExtra("fecha_fin", p.getFecha_finalizacion());
+        intent.putExtra("fecha_inicio", p.getFecha_inicio().toString()); // --> MODIFICADO
+        intent.putExtra("fecha_fin", p.getFecha_finalizacion().toString()); // --> MODIFICADO
 
         formLauncher.launch(intent);
     }

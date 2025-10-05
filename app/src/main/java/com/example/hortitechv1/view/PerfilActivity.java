@@ -41,6 +41,7 @@ import com.example.hortitechv1.network.ApiClient;
 import com.example.hortitechv1.network.ApiUsuario;
 import com.google.android.material.navigation.NavigationView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -148,8 +149,9 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
     }
 
     private void cargarPerfilCompleto() {
+        String authToken = sessionManager.getAuthToken(); // Quita "Bearer " porque ya lo incluye
         ApiUsuario api = ApiClient.getClient().create(ApiUsuario.class);
-        api.getAuthenticatedUserProfile(sessionManager.getAuthToken()).enqueue(new Callback<Persona>() {
+        api.getAuthenticatedUserProfile(authToken).enqueue(new Callback<Persona>() {
             @Override
             public void onResponse(Call<Persona> call, Response<Persona> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -174,6 +176,7 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
         });
     }
 
+    // --- ✨ MÉTODO CORREGIDO ---
     private void uploadImage(Uri imageUri) {
         File file = uriToFile(imageUri);
         if (file == null) {
@@ -183,18 +186,21 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
 
         RequestBody requestFile = RequestBody.create(MediaType.parse(getContentResolver().getType(imageUri)), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("profile_picture", file.getName(), requestFile);
+
         ApiUsuario api = ApiClient.getClient().create(ApiUsuario.class);
-        Call<Persona> call = api.uploadProfilePicture(sessionManager.getAuthToken(), body);
+
+        String authToken = "Bearer " + sessionManager.getAuthToken();
+        int userId = sessionManager.getUserId();
+
+        Call<Persona> call = api.uploadProfilePicture(authToken, userId, body);
 
         call.enqueue(new Callback<Persona>() {
             @Override
-            public void onResponse(Call<Persona> call, Response<Persona> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Persona updatedUser = response.body();
-                    String newFotoUrl = updatedUser.getPerfil().getFoto_url();
-                    sessionManager.updateUserFotoUrl(newFotoUrl);
+            public void onResponse(@NonNull Call<Persona> call, @NonNull Response<Persona> response) {
+                if (response.isSuccessful()) {
                     Toast.makeText(PerfilActivity.this, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show();
-                    Glide.with(PerfilActivity.this).load(newFotoUrl).circleCrop().placeholder(R.drawable.ic_profile_placeholder).into(ivFotoPerfil);
+                    // Volvemos a cargar todo el perfil para asegurar que la URL esté actualizada en todos lados
+                    cargarPerfilCompleto();
                 } else {
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "Respuesta de error vacía";
@@ -203,14 +209,12 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
                     } catch (Exception e) {
                         Log.e("UploadError", "Error al leer el errorBody: ", e);
                     }
-                    mostrarDatosGuardados();
                 }
             }
             @Override
-            public void onFailure(Call<Persona> call, Throwable t) {
+            public void onFailure(@NonNull Call<Persona> call, @NonNull Throwable t) {
                 Log.e("UploadError", "Error en onFailure: " + t.getMessage(), t);
                 Toast.makeText(PerfilActivity.this, "Fallo de conexión. Revisa el Logcat.", Toast.LENGTH_LONG).show();
-                mostrarDatosGuardados();
             }
         });
     }
@@ -227,6 +231,7 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
         });
         builder.show();
     }
+
     private void takePicture() {
         try {
             File photoFile = createImageFile();
@@ -236,36 +241,41 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
             Toast.makeText(this, "Error al crear el archivo de imagen", Toast.LENGTH_SHORT).show();
         }
     }
+
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalCacheDir();
         return File.createTempFile(imageFileName, ".jpg", storageDir);
     }
+
     private File uriToFile(final Uri uri) {
         File file = null;
-        try {
+        try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
+            if (inputStream == null) return null;
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
             String fileName = "IMG_" + timeStamp;
-            file = File.createTempFile(fileName, "." + getFileExtension(uri), getExternalCacheDir());
-            try (InputStream inputStream = getContentResolver().openInputStream(uri);
-                 OutputStream outputStream = new FileOutputStream(file)) {
-                byte[] buffer = new byte[4096];
-                int len;
-                while ((len = inputStream.read(buffer)) > 0) {
-                    outputStream.write(buffer, 0, len);
+            File tempFile = File.createTempFile(fileName, "." + getFileExtension(uri), getCacheDir());
+            try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
+                byte[] buffer = new byte[4 * 1024];
+                int read;
+                while ((read = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, read);
                 }
+                file = tempFile;
             }
         } catch (Exception e) {
             Log.e("FileUtil", "Error creating file from URI", e);
         }
         return file;
     }
+
     private String getFileExtension(Uri uri) {
         ContentResolver cR = getContentResolver();
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         return mime.getExtensionFromMimeType(cR.getType(uri));
     }
+
     private void setupDrawerAnimation(Toolbar toolbar) {
         drawerLayout.setScrimColor(Color.TRANSPARENT);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
@@ -282,6 +292,7 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
     }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
@@ -304,6 +315,7 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
     private void styleLogoutMenuItem(Menu menu) {
         MenuItem logoutItem = menu.findItem(R.id.nav_logout);
         if (logoutItem != null) {
@@ -318,6 +330,7 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
             }
         }
     }
+
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {

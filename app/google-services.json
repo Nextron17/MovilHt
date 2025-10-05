@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "773978937080",
-    "project_id": "hortitech-a4633",
-    "storage_bucket": "hortitech-a4633.firebasestorage.app"
+    "project_number": "892632026715",
+    "project_id": "hortitech-77d9f",
+    "storage_bucket": "hortitech-77d9f.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:773978937080:android:0319ccf93f55bce0f74d0d",
+        "mobilesdk_app_id": "1:892632026715:android:63eab849438011e55b797e",
         "android_client_info": {
           "package_name": "com.example.hortitechv1"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBDNEqiJO7Ws-93Cok4zyziRH4iQRHwKAM"
+          "current_key": "AIzaSyDIY00KZTfI7y2myiQJeU6_wfB2IWUpT-U"
         }
       ],
       "services": {

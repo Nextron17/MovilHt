@@ -76,6 +76,12 @@ public class ProgramacionIluminacionActivity extends AppCompatActivity {
             public void onEliminarClick(ProgramacionIluminacion programacion) {
                 mostrarDialogoEliminar(programacion);
             }
+
+            // --> AÑADIDO
+            @Override
+            public void onReanudarClick(ProgramacionIluminacion programacion) {
+                reanudarProgramacion(programacion);
+            }
         });
         recyclerView.setAdapter(adapter);
 
@@ -133,6 +139,29 @@ public class ProgramacionIluminacionActivity extends AppCompatActivity {
                 .show();
     }
 
+    // --> AÑADIDO: Llama a la API para reanudar una programación
+    private void reanudarProgramacion(ProgramacionIluminacion p) {
+        ProgramacionIluminacion programacionConEstado = new ProgramacionIluminacion();
+        programacionConEstado.setEstado(true); // Cambiar a activo
+
+        api.cambiarEstadoProgramacion(p.getId_iluminacion(), programacionConEstado).enqueue(new Callback<ProgramacionIluminacion>() {
+            @Override
+            public void onResponse(@NonNull Call<ProgramacionIluminacion> call, @NonNull Response<ProgramacionIluminacion> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(ProgramacionIluminacionActivity.this, "Programación reanudada", Toast.LENGTH_SHORT).show();
+                    getProgramacionesFuturas();
+                } else {
+                    Toast.makeText(ProgramacionIluminacionActivity.this, "No se pudo reanudar", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ProgramacionIluminacion> call, @NonNull Throwable t) {
+                Toast.makeText(ProgramacionIluminacionActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     private void detenerProgramacion(ProgramacionIluminacion p) {
         ProgramacionIluminacion programacionConEstado = new ProgramacionIluminacion();
         programacionConEstado.setEstado(false);
@@ -180,7 +209,6 @@ public class ProgramacionIluminacionActivity extends AppCompatActivity {
         intent.putExtra("programacion_id", p.getId_iluminacion());
         intent.putExtra("descripcion", p.getDescripcion());
 
-        // ✅ Adaptado: se envían en ISO 8601 usando OffsetDateTime (si existen)
         OffsetDateTime inicio = p.getFecha_inicio();
         if (inicio != null) {
             intent.putExtra("fecha_inicio", inicio.toString());
