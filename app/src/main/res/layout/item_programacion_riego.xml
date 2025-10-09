@@ -84,29 +84,6 @@
             android:gravity="end|center_vertical">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnReanudarRiego"
-                style="@style/Widget.MaterialComponents.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="110dp"
-                android:text="Reanudar"
-                android:visibility="gone"
-                android:layout_marginEnd="8dp"
-                app:backgroundTint="@color/verde_reanudar"
-                app:cornerRadius="8dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDetenerRiego"
-                style="@style/Widget.MaterialComponents.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="110dp"
-                android:text="Detener"
-                android:layout_marginEnd="8dp"
-                app:backgroundTint="@color/amarillo_detener"
-                app:cornerRadius="8dp" />
-
-            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEditarRiego"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

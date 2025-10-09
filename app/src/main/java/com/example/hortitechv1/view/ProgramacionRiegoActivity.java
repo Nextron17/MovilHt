@@ -61,6 +61,7 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
 
         api = ApiClient.getClient().create(ApiProRiego.class);
 
+        // Se elimina la referencia a onDetenerClick y onReanudarClick
         adapter = new ProgramacionRiegoAdapter(this, listaProgramaciones, new ProgramacionRiegoAdapter.OnItemClickListener() {
             @Override
             public void onActualizarClick(ProgramacionRiego programacion) {
@@ -68,20 +69,10 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onDetenerClick(ProgramacionRiego programacion) {
-                mostrarDialogoDetener(programacion);
-            }
-
-            @Override
             public void onEliminarClick(ProgramacionRiego programacion) {
                 mostrarDialogoEliminar(programacion);
             }
-
-            // --> AÑADIDO
-            @Override
-            public void onReanudarClick(ProgramacionRiego programacion) {
-                reanudarProgramacion(programacion);
-            }
+            // Los métodos onDetenerClick y onReanudarClick han sido eliminados del Adapter y su implementación aquí.
         });
         recyclerView.setAdapter(adapter);
 
@@ -134,72 +125,11 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void mostrarDialogoDetener(ProgramacionRiego p) {
-        new AlertDialog.Builder(this)
-                .setTitle("Confirmar Detención")
-                .setMessage("¿Estás seguro de que deseas detener esta programación? Cambiará su estado a inactivo.")
-                .setPositiveButton("Detener", (dialog, which) -> detenerProgramacion(p))
-                .setNegativeButton("Cancelar", null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
-    }
+    // MÉTODOS DE DETENCIÓN Y REANUDACIÓN ELIMINADOS
+    // REMOVIDO: private void mostrarDialogoDetener(ProgramacionRiego p) {...}
+    // REMOVIDO: private void reanudarProgramacion(ProgramacionRiego p) {...}
+    // REMOVIDO: private void detenerProgramacion(ProgramacionRiego p) {...}
 
-    // --> AÑADIDO: Llama a la API para reanudar una programación
-    private void reanudarProgramacion(ProgramacionRiego p) {
-        ProgramacionRiego programacionConEstado = new ProgramacionRiego();
-        programacionConEstado.setEstado(true); // Cambiar a activo
-
-        api.cambiarEstadoProgramacion(p.getId_pg_riego(), programacionConEstado)
-                .enqueue(new Callback<ProgramacionRiego>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ProgramacionRiego> call,
-                                           @NonNull Response<ProgramacionRiego> response) {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(ProgramacionRiegoActivity.this,
-                                    "Programación reanudada", Toast.LENGTH_SHORT).show();
-                            getProgramacionesFuturas();
-                        } else {
-                            Toast.makeText(ProgramacionRiegoActivity.this,
-                                    "No se pudo reanudar", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ProgramacionRiego> call, @NonNull Throwable t) {
-                        Toast.makeText(ProgramacionRiegoActivity.this,
-                                "Error: " + t.getMessage(),
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
-
-    private void detenerProgramacion(ProgramacionRiego p) {
-        ProgramacionRiego programacionConEstado = new ProgramacionRiego();
-        programacionConEstado.setEstado(false);
-
-        api.cambiarEstadoProgramacion(p.getId_pg_riego(), programacionConEstado)
-                .enqueue(new Callback<ProgramacionRiego>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ProgramacionRiego> call,
-                                           @NonNull Response<ProgramacionRiego> response) {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(ProgramacionRiegoActivity.this,
-                                    "Programación detenida", Toast.LENGTH_SHORT).show();
-                            getProgramacionesFuturas();
-                        } else {
-                            Toast.makeText(ProgramacionRiegoActivity.this,
-                                    "No se pudo detener", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ProgramacionRiego> call, @NonNull Throwable t) {
-                        Toast.makeText(ProgramacionRiegoActivity.this,
-                                "Error: " + t.getMessage(),
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
 
     private void eliminarProgramacion(ProgramacionRiego p) {
         api.eliminarProgramacion(p.getId_pg_riego()).enqueue(new Callback<Void>() {
@@ -230,8 +160,9 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
         intent.putExtra("programacion_id", p.getId_pg_riego());
         intent.putExtra("descripcion", p.getDescripcion());
         intent.putExtra("tipo_riego", p.getTipo_riego());
-        intent.putExtra("fecha_inicio", p.getFecha_inicio().toString()); // --> MODIFICADO
-        intent.putExtra("fecha_fin", p.getFecha_finalizacion().toString()); // --> MODIFICADO
+        // Se asume que getFecha_inicio() y getFecha_finalizacion() no son nulos aquí.
+        intent.putExtra("fecha_inicio", p.getFecha_inicio().toString());
+        intent.putExtra("fecha_fin", p.getFecha_finalizacion().toString());
 
         formLauncher.launch(intent);
     }
