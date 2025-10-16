@@ -19,7 +19,6 @@ public class ApiClient {
     public static Retrofit getClient() {
         if (retrofit == null) {
 
-            // Serializer & Deserializer para OffsetDateTime
             JsonDeserializer<OffsetDateTime> deserializer = (json, type, ctx) ->
                     OffsetDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 

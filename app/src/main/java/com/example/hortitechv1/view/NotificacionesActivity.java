@@ -39,7 +39,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-// PASO 1: Implementar la interfaz para el menú de navegación
 public class NotificacionesActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView rvNotificaciones;
@@ -48,7 +47,6 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
     private TextView tvSinNotificaciones;
     private SessionManager sessionManager;
 
-    // PASO 2: Declarar las variables para el DrawerLayout
     private DrawerLayout drawerLayout;
     private LinearLayout mainContentContainer;
     private static final float END_SCALE = 0.8f;
@@ -60,18 +58,14 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
 
         sessionManager = new SessionManager(this);
 
-        // --- INICIO: CÓDIGO AÑADIDO PARA EL SIDEBAR ---
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         drawerLayout = findViewById(R.id.drawer_layout);
-        mainContentContainer = findViewById(R.id.main_content_container); // Asegúrate de que el contenedor principal tenga este ID en tu XML
+        mainContentContainer = findViewById(R.id.main_content_container);
         NavigationView navigationView = findViewById(R.id.navigation_view);
         setupDrawerAnimation(toolbar);
         navigationView.setNavigationItemSelectedListener(this);
         styleLogoutMenuItem(navigationView.getMenu());
-        // Opcional: marca un ítem del menú como seleccionado, por ejemplo el de bitácora/notificaciones
-        // navigationView.setCheckedItem(R.id.nav_log);
-        // --- FIN: CÓDIGO AÑADIDO PARA EL SIDEBAR ---
 
 
         rvNotificaciones = findViewById(R.id.rvNotificaciones);
@@ -91,7 +85,7 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
         String authToken = sessionManager.getAuthToken();
         if (authToken == null) {
             Toast.makeText(this, "Error: Sesión no válida.", Toast.LENGTH_SHORT).show();
-            sessionManager.logoutUser(); // Redirigir al login si no hay token
+            sessionManager.logoutUser();
             return;
         }
 
@@ -126,8 +120,6 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
         });
     }
 
-    // --- PASO 3: AÑADIR TODOS LOS MÉTODOS DEL SIDEBAR DE PERFILACTIVITY ---
-
     private void setupDrawerAnimation(Toolbar toolbar) {
         drawerLayout.setScrimColor(Color.TRANSPARENT);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
@@ -148,7 +140,6 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        // Usamos un delay para que la animación del drawer no se corte
         new android.os.Handler().postDelayed(() -> {
             if (itemId == R.id.nav_home) {
                 startActivity(new Intent(NotificacionesActivity.this, HomeActivity.class));
@@ -159,10 +150,9 @@ public class NotificacionesActivity extends AppCompatActivity implements Navigat
             } else if (itemId == R.id.nav_settings) {
                 startActivity(new Intent(NotificacionesActivity.this, PerfilActivity.class));
             } else if (itemId == R.id.nav_log) {
-                // Si ya estamos aquí, solo cerramos el drawer
-                // O si es una actividad diferente, iniciamos el intent
-                // startActivity(new Intent(NotificacionesActivity.this, BitacoraActivity.class));
+                startActivity(new Intent(NotificacionesActivity.this, BitacoraActivity.class));
             }
+
         }, 250);
 
         if (itemId == R.id.nav_logout) {

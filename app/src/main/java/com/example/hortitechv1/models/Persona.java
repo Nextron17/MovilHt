@@ -24,7 +24,6 @@ public class Persona implements Serializable {
         return nombre_usuario;
     }
 
-    // Puedes mantener o remover este constructor si no lo usas
     public Persona(int id_persona,String nombre_usuario, String correo, String contrasena, Rol rol, Estado estado,boolean isVerified,String verificationCode, int intentos ) {
         this.id_persona = id_persona;
         this.nombre_usuario = nombre_usuario;
@@ -70,7 +69,6 @@ public class Persona implements Serializable {
         this.contrasena = contrasena;
     }
 
-    // --- NUEVOS GETTER Y SETTER ---
     public String getContrasena_actual() {
         return contrasena_actual;
     }

@@ -142,6 +142,8 @@ public class CultivosActivity extends AppCompatActivity implements NavigationVie
                 startActivity(new Intent(CultivosActivity.this, BitacoraActivity.class));
             } else if (itemId == R.id.nav_settings) {
                 startActivity(new Intent(CultivosActivity.this, PerfilActivity.class));
+            }else if (itemId == R.id.nav_notifications) {
+                startActivity(new Intent(CultivosActivity.this, NotificacionesActivity.class));
             }
         }, 250);
 

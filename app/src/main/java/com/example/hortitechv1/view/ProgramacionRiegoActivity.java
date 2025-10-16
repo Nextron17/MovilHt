@@ -61,7 +61,6 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
 
         api = ApiClient.getClient().create(ApiProRiego.class);
 
-        // Se elimina la referencia a onDetenerClick y onReanudarClick
         adapter = new ProgramacionRiegoAdapter(this, listaProgramaciones, new ProgramacionRiegoAdapter.OnItemClickListener() {
             @Override
             public void onActualizarClick(ProgramacionRiego programacion) {
@@ -72,7 +71,6 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
             public void onEliminarClick(ProgramacionRiego programacion) {
                 mostrarDialogoEliminar(programacion);
             }
-            // Los métodos onDetenerClick y onReanudarClick han sido eliminados del Adapter y su implementación aquí.
         });
         recyclerView.setAdapter(adapter);
 
@@ -125,11 +123,6 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
                 .show();
     }
 
-    // MÉTODOS DE DETENCIÓN Y REANUDACIÓN ELIMINADOS
-    // REMOVIDO: private void mostrarDialogoDetener(ProgramacionRiego p) {...}
-    // REMOVIDO: private void reanudarProgramacion(ProgramacionRiego p) {...}
-    // REMOVIDO: private void detenerProgramacion(ProgramacionRiego p) {...}
-
 
     private void eliminarProgramacion(ProgramacionRiego p) {
         api.eliminarProgramacion(p.getId_pg_riego()).enqueue(new Callback<Void>() {
@@ -160,7 +153,6 @@ public class ProgramacionRiegoActivity extends AppCompatActivity {
         intent.putExtra("programacion_id", p.getId_pg_riego());
         intent.putExtra("descripcion", p.getDescripcion());
         intent.putExtra("tipo_riego", p.getTipo_riego());
-        // Se asume que getFecha_inicio() y getFecha_finalizacion() no son nulos aquí.
         intent.putExtra("fecha_inicio", p.getFecha_inicio().toString());
         intent.putExtra("fecha_fin", p.getFecha_finalizacion().toString());
 

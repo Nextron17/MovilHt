@@ -162,6 +162,8 @@ public class EditarPerfilActivity extends AppCompatActivity implements Navigatio
                 startActivity(new Intent(EditarPerfilActivity.this, CultivosActivity.class));
             } else if (itemId == R.id.nav_log) {
                 startActivity(new Intent(EditarPerfilActivity.this, BitacoraActivity.class));
+            }else if (itemId == R.id.nav_notifications) {
+                startActivity(new Intent(EditarPerfilActivity.this, NotificacionesActivity.class));
             }
         }, 250);
 

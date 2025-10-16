@@ -61,19 +61,14 @@ public class ProgramacionRiegoAdapter extends RecyclerView.Adapter<ProgramacionR
         holder.tvFechaDesactivacion.setText("Fin: " + formatearFecha(p.getFecha_finalizacion()));
         holder.tvTipoRiego.setText("Tipo: " + (p.getTipo_riego() != null ? p.getTipo_riego() : "-"));
 
-        // Lógica simplificada: siempre editable/eliminable
         holder.btnEditar.setEnabled(true);
         holder.btnEliminar.setEnabled(true);
 
-        // Los botones de Detener/Reanudar fueron eliminados del XML, se remueve su lógica de visibilidad.
         holder.btnEditar.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.azul_editar)));
         holder.btnEliminar.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.rojo_eliminar)));
 
-        // Listeners de botones
         holder.btnEditar.setOnClickListener(v -> listener.onActualizarClick(p));
-        // REMOVIDO: holder.btnDetener.setOnClickListener(v -> listener.onDetenerClick(p));
         holder.btnEliminar.setOnClickListener(v -> listener.onEliminarClick(p));
-        // REMOVIDO: holder.btnReanudar.setOnClickListener(v -> listener.onReanudarClick(p));
     }
 
     @Override
@@ -90,7 +85,7 @@ public class ProgramacionRiegoAdapter extends RecyclerView.Adapter<ProgramacionR
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvFechaActivacion, tvFechaDesactivacion, tvDescripcion, tvTipoRiego;
-        Button btnEditar, btnEliminar; // REMOVIDO: btnDetener, btnReanudar
+        Button btnEditar, btnEliminar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -99,10 +94,8 @@ public class ProgramacionRiegoAdapter extends RecyclerView.Adapter<ProgramacionR
             tvDescripcion = itemView.findViewById(R.id.tvDescripcionProgramacionRiego);
             tvTipoRiego = itemView.findViewById(R.id.tvTipoRiegoProgramacionRiego);
 
-            // REMOVIDO: btnDetener = itemView.findViewById(R.id.btnDetenerRiego);
             btnEditar = itemView.findViewById(R.id.btnEditarRiego);
             btnEliminar = itemView.findViewById(R.id.btnEliminarRiego);
-            // REMOVIDO: btnReanudar = itemView.findViewById(R.id.btnReanudarRiego);
         }
     }
 }

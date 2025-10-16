@@ -13,7 +13,6 @@ public class Zona implements Serializable {
     private Estado estado;
     private int id_invernadero;
 
-    // private GestionCultivos id_cultivo;
     private Estado_iluminacion estado_iluminacion;
 
     public Zona(){

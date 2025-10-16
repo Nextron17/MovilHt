@@ -31,7 +31,7 @@ public class HomeFragment extends Fragment {
         final String title;
         final String description;
         final int iconResId;
-        final Class<?> activityToOpen; // Clase de la Activity a abrir
+        final Class<?> activityToOpen;
 
         DashboardItem(String title, String description, int iconResId, Class<?> activityToOpen) {
             this.title = title;
@@ -50,7 +50,6 @@ public class HomeFragment extends Fragment {
 
         GridLayout gridLayout = view.findViewById(R.id.dashboard_grid);
 
-        // Definimos las 6 opciones que se mostrarán en el panel
         DashboardItem[] items = {
                 new DashboardItem("Invernaderos", "Gestiona los invernaderos.", R.drawable.ic_sprout, InvernaderoActivity.class),
                 new DashboardItem("Cultivos", "Revisa tus cultivos.", R.drawable.ic_package, CultivosActivity.class),
@@ -62,10 +61,9 @@ public class HomeFragment extends Fragment {
 
         };
 
-        // Poblar el GridLayout dinámicamente
         int cardIndex = 0;
         for (DashboardItem item : items) {
-            addCardToGrid(gridLayout, item, cardIndex * 75L); // 75ms de retraso entre tarjetas
+            addCardToGrid(gridLayout, item, cardIndex * 75L);
             cardIndex++;
         }
 
@@ -86,7 +84,6 @@ public class HomeFragment extends Fragment {
         title.setText(item.title);
         description.setText(item.description);
 
-        // Lógica de clic para navegar a la Activity correspondiente
         cardView.setOnClickListener(v -> {
             if (item.activityToOpen != null) {
                 Intent intent = new Intent(getActivity(), item.activityToOpen);
@@ -102,7 +99,6 @@ public class HomeFragment extends Fragment {
 
         gridLayout.addView(cardView);
 
-        // Animación de entrada
         cardView.setAlpha(0f);
         cardView.setTranslationY(50f);
         cardView.animate()

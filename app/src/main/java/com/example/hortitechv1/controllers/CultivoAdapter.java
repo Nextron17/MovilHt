@@ -40,7 +40,7 @@ public class CultivoAdapter extends RecyclerView.Adapter<CultivoAdapter.ViewHold
 
         Glide.with(context)
                 .load(cultivo.getImagenes())
-                .placeholder(R.drawable.sprout) // Imagen de placeholder
+                .placeholder(R.drawable.sprout)
                 .into(holder.ivCultivoImage);
 
         holder.tvNombre.setText(cultivo.getNombre_cultivo());
@@ -61,7 +61,6 @@ public class CultivoAdapter extends RecyclerView.Adapter<CultivoAdapter.ViewHold
         String fechaInicio = (cultivo.getFecha_inicio() != null) ? cultivo.getFecha_inicio().split("T")[0] : "N/A";
         holder.tvFechas.setText("📅 " + fechaInicio + " - " + fechaFin);
 
-        // Lógica para unidad de medida
         String unidad = cultivo.getUnidad_medida() != null ? " " + cultivo.getUnidad_medida() : "";
         holder.tvCosechada.setText("Cosechado: " + cultivo.getCantidad_cosechada() + unidad);
         holder.tvDisponible.setText("Disponible: " + cultivo.getCantidad_disponible() + unidad);

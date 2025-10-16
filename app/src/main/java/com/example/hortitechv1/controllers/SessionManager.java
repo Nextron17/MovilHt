@@ -63,7 +63,6 @@ public class SessionManager {
         Log.d("PerfilDebug", "Guardado de sesión finalizado.");
     }
 
-    // Método para actualizar el nombre y correo del usuario
     public void updateUser(String name, String email) {
         editor.putString(KEY_USER_NAME, name);
         editor.putString(KEY_USER_EMAIL, email);

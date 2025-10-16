@@ -16,7 +16,6 @@ public interface ApiProRiego {
     @PUT("api/programacionRiego/{id}")
     Call<ProgramacionRiego> actualizarProgramacion(@Path("id") int id, @Body ProgramacionRiego programacion);
 
-    // Endpoint para cambiar el estado (detener)
     @PATCH("api/programacionRiego/{id}/estado")
     Call<ProgramacionRiego> cambiarEstadoProgramacion(@Path("id") int id, @Body ProgramacionRiego programacion);
 

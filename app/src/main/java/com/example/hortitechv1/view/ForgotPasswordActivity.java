@@ -86,7 +86,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(ForgotPasswordActivity.this, "Contraseña actualizada con éxito.", Toast.LENGTH_LONG).show();
-                    finish(); // Vuelve a la pantalla de login
+                    finish();
                 } else {
                     Toast.makeText(ForgotPasswordActivity.this, "Error: Código incorrecto o expirado.", Toast.LENGTH_SHORT).show();
                 }

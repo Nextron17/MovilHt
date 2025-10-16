@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.google.gms.google.services) // <-- AÑADE ESTA LÍNEA
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -50,13 +50,11 @@ dependencies {
     implementation(libs.cardview)
 
     implementation(libs.github.glide)
-    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0") // <-- Importante para Glide
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
-    // Logging de Red
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
 
-    // --- DEPENDENCIAS DE FIREBASE AÑADIDAS ---
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.messaging.ktx)

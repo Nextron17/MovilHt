@@ -26,7 +26,7 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "LOGIN_APP_HORTITECH"; // Etiqueta para depuración
+    private static final String TAG = "LOGIN_APP_HORTITECH";
     private SessionManager sessionManager;
     private Button btnLogin;
     private ProgressBar loadingProgressBar;
@@ -50,11 +50,9 @@ public class MainActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         loadingProgressBar = findViewById(R.id.loadingProgressBar);
 
-        // Aseguramos que el ProgressBar esté oculto inicialmente para no bloquear clics
         loadingProgressBar.setVisibility(View.GONE);
 
         btnLogin.setOnClickListener(v -> {
-            // ⭐ LOG DE PRUEBA CRÍTICO: ¿El clic llega al código?
             Log.d(TAG, "LOGIN_TEST: El botón de Iniciar Sesión fue presionado.");
 
             String correo = etCorreo.getText().toString().trim();
@@ -82,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.GONE);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    // ⭐ LOG DE ÉXITO
                     Log.i(TAG, "LOGIN_API: Respuesta Exitosa. Código HTTP: " + response.code());
                     sessionManager.saveUserSession(response.body());
 
@@ -92,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(MainActivity.this, HomeActivity.class));
                     finish();
                 } else {
-                    // ⭐ LOG DE ERROR DE RESPUESTA (Credenciales o Error del Servidor)
                     Log.e(TAG, "LOGIN_API: Respuesta Fallida. Código HTTP: " + response.code());
                     Toast.makeText(getApplicationContext(), "Credenciales incorrectas", Toast.LENGTH_LONG).show();
                 }
@@ -102,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
                 btnLogin.setVisibility(View.VISIBLE);
                 loadingProgressBar.setVisibility(View.GONE);
-                // ⭐ LOG DE ERROR DE CONEXIÓN
                 Log.e(TAG, "LOGIN_API: Fallo de Conexión. Mensaje: " + t.getMessage(), t);
                 Toast.makeText(MainActivity.this, "Fallo de conexión", Toast.LENGTH_LONG).show();
             }

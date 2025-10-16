@@ -6,7 +6,6 @@ import retrofit2.Call;
 import retrofit2.http.*;
 
 public interface ApiInvernaderos {
-    //Solo utilizaremos el metodo get porque solo es vista
     @GET("api/invernadero")
         Call<List<Invernadero>> getInvernaderos();
 

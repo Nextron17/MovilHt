@@ -60,9 +60,7 @@ public class ProgramacionIlumiAdapter extends RecyclerView.Adapter<ProgramacionI
         holder.tvFechaActivacion.setText("Inicio: " + formatearFecha(p.getFecha_inicio()));
         holder.tvFechaDesactivacion.setText("Fin: " + formatearFecha(p.getFecha_finalizacion()));
 
-        // Lógica para cambiar la UI según el estado
-        if (p.isEstado()) { // --> CORREGIDO: Se usa isEstado()
-            // Estado ACTIVO
+        if (p.isEstado()) {
             holder.btnDetener.setVisibility(View.VISIBLE);
             holder.btnReanudar.setVisibility(View.GONE);
 

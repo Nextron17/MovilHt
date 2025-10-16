@@ -209,6 +209,8 @@ public class BitacoraActivity extends AppCompatActivity implements BitacoraAdapt
                 startActivity(new Intent(BitacoraActivity.this, CultivosActivity.class));
             } else if (itemId == R.id.nav_settings) {
                 startActivity(new Intent(BitacoraActivity.this, PerfilActivity.class));
+            }else if (itemId == R.id.nav_notifications) {
+                startActivity(new Intent(BitacoraActivity.this, NotificacionesActivity.class));
             }
         }, 250);
 

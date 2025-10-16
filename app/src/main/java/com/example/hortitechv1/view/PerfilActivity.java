@@ -176,7 +176,6 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
         });
     }
 
-    // --- ✨ MÉTODO CORREGIDO ---
     private void uploadImage(Uri imageUri) {
         File file = uriToFile(imageUri);
         if (file == null) {
@@ -199,7 +198,6 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
             public void onResponse(@NonNull Call<Persona> call, @NonNull Response<Persona> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(PerfilActivity.this, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show();
-                    // Volvemos a cargar todo el perfil para asegurar que la URL esté actualizada en todos lados
                     cargarPerfilCompleto();
                 } else {
                     try {
@@ -305,6 +303,8 @@ public class PerfilActivity extends AppCompatActivity implements NavigationView.
                 startActivity(new Intent(PerfilActivity.this, CultivosActivity.class));
             } else if (itemId == R.id.nav_log) {
                 startActivity(new Intent(PerfilActivity.this, BitacoraActivity.class));
+            } else if (itemId == R.id.nav_notifications) {
+                startActivity(new Intent(PerfilActivity.this, NotificacionesActivity.class));
             }
         }, 250);
 

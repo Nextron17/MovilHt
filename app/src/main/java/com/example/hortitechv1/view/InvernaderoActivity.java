@@ -130,7 +130,9 @@ public class InvernaderoActivity extends AppCompatActivity implements Navigation
                 startActivity(new Intent(InvernaderoActivity.this, BitacoraActivity.class));
             } else if (itemId == R.id.nav_settings) {
                 startActivity(new Intent(InvernaderoActivity.this, PerfilActivity.class));
-            } else if (itemId == R.id.nav_logout) {
+            } else if (itemId == R.id.nav_notifications) {
+                startActivity(new Intent(InvernaderoActivity.this, NotificacionesActivity.class));
+            }else if (itemId == R.id.nav_logout) {
                 sessionManager.logoutUser();
             }
         }, 250);

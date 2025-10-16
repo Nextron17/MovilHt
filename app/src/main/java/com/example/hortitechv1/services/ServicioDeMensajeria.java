@@ -30,7 +30,6 @@ public class ServicioDeMensajeria extends FirebaseMessagingService {
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
         Log.d(TAG, "Nuevo token generado: " + token);
-        // Intentamos enviar el token si el usuario ya ha iniciado sesión
         enviarTokenAlServidor(getApplicationContext(), token);
     }
 
@@ -61,7 +60,6 @@ public class ServicioDeMensajeria extends FirebaseMessagingService {
                 });
     }
 
-    // --- ✨ MÉTODO UNIFICADO Y CORREGIDO ---
     private static void enviarTokenAlServidor(Context context, String token) {
         SessionManager sessionManager = new SessionManager(context);
         String authToken = sessionManager.getAuthToken();
@@ -74,7 +72,6 @@ public class ServicioDeMensajeria extends FirebaseMessagingService {
         ApiNotificaciones api = ApiClient.getClient().create(ApiNotificaciones.class);
         FcmTokenRequest requestBody = new FcmTokenRequest(token);
 
-        // Usamos el método correcto de la interfaz: sendFcmToken
         Call<Void> call = api.sendFcmToken("Bearer " + authToken, requestBody);
 
         call.enqueue(new Callback<Void>() {

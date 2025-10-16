@@ -46,7 +46,6 @@ public class ZonaAdapter extends RecyclerView.Adapter<ZonaAdapter.ViewHolder> {
         holder.tvDescripcion.setText(zona.getDescripciones_add());
         holder.tvEstado.setText("Estado: " + zona.getEstado().name());
 
-        // Obtener nombre del invernadero usando su ID
         int idInvernadero = zona.getId_invernadero();
         String nombreInvernadero = buscarNombreInvernadero(idInvernadero);
         holder.tvIdInvernadero.setText("Invernadero: " + nombreInvernadero);
@@ -58,7 +57,6 @@ public class ZonaAdapter extends RecyclerView.Adapter<ZonaAdapter.ViewHolder> {
             context.startActivity(intent);
         });
 
-        // Botón para ir a programación de iluminación
         holder.btnIluminacion.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProgramacionIluminacionActivity.class);
             intent.putExtra("zona_id", zona.getId_zona()); // pasamos el id_zona

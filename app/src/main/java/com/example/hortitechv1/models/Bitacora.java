@@ -37,7 +37,7 @@ public class Bitacora implements Serializable {
         private int responsable_id; // CAMPO AÑADIDO
         public int getId_invernadero() { return id_invernadero; }
         public String getNombre() { return nombre; }
-        public int getResponsable_id() { return responsable_id; } // GETTER AÑADIDO
+        public int getResponsable_id() { return responsable_id; }
         @Override public String toString() { return nombre; }
     }
 

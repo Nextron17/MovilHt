@@ -10,7 +10,6 @@ import retrofit2.http.*;
 
 public interface ApiProIluminacion {
 
-        //Para historiales
         @GET("api/programacioniluminacion")
         Call<List<ProgramacionIluminacion>> getTodasLasProgramaciones();
         @GET("api/programacioniluminacion/{id}")
@@ -19,10 +18,8 @@ public interface ApiProIluminacion {
         //Listar por zonas
         @GET("api/programacioniluminacion/zona/{idZona}/futuras")
         Call<List<ProgramacionIluminacion>> getProgramacionesFuturas(@Path("idZona") int idZona);
-        //Crear la Porgramacion
         @POST("api/programacioniluminacion")
         Call<ProgramacionIluminacion> crearProgramacion(@Body ProgramacionIluminacion programacion);
-        //Cambiamos el estado de una programacion para detener la ejecucion
         @PATCH("api/Programacioniluminacion/{id}/estado")
         Call<ProgramacionIluminacion> cambiarEstadoProgramacion(
                 @Path("id") int id,

@@ -34,9 +34,7 @@ public class FormProIluminacionActivity extends AppCompatActivity {
     private int idZona;
     private int programacionId = -1;
 
-    // Formato ISO para enviar al backend
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-    // Formato visible en pantalla
     private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @Override
@@ -121,14 +119,11 @@ public class FormProIluminacionActivity extends AppCompatActivity {
                                 calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                                 calendar.set(Calendar.MINUTE, minute);
 
-                                // Convertir Calendar a OffsetDateTime
                                 OffsetDateTime odt = calendar.toInstant()
                                         .atZone(ZoneId.systemDefault())
                                         .toOffsetDateTime();
 
-                                // Mostrar bonito
                                 editText.setText(odt.format(DISPLAY_FORMATTER));
-                                // Guardar ISO real en tag
                                 editText.setTag(odt.format(ISO_FORMATTER));
                             },
                             calendar.get(Calendar.HOUR_OF_DAY),

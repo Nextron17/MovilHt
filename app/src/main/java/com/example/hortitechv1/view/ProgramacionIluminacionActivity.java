@@ -77,7 +77,6 @@ public class ProgramacionIluminacionActivity extends AppCompatActivity {
                 mostrarDialogoEliminar(programacion);
             }
 
-            // --> AÑADIDO
             @Override
             public void onReanudarClick(ProgramacionIluminacion programacion) {
                 reanudarProgramacion(programacion);
@@ -139,7 +138,6 @@ public class ProgramacionIluminacionActivity extends AppCompatActivity {
                 .show();
     }
 
-    // --> AÑADIDO: Llama a la API para reanudar una programación
     private void reanudarProgramacion(ProgramacionIluminacion p) {
         ProgramacionIluminacion programacionConEstado = new ProgramacionIluminacion();
         programacionConEstado.setEstado(true); // Cambiar a activo

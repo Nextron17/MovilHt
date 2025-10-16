@@ -12,7 +12,6 @@ public class ProgramacionIluminacion {
     private OffsetDateTime updated_at;
     private boolean estado;
 
-    // Constructor vacío
     public ProgramacionIluminacion() {}
 
     public ProgramacionIluminacion(Integer id_iluminacion, int id_zona, String descripcion,

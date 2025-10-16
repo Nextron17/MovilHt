@@ -39,7 +39,6 @@ public class FormProRiegoActivity extends AppCompatActivity {
 
     private final String[] tiposRiego = {"Aspersión", "Goteo", "Manual"};
 
-    // Formatos iguales a iluminación
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -48,7 +47,6 @@ public class FormProRiegoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_pro_riego);
 
-        // Vinculación de vistas
         etDescripcion = findViewById(R.id.etPR);
         etFechaInicio = findViewById(R.id.etFechaInicioR);
         etFechaFin = findViewById(R.id.etFechaFinR);
@@ -59,11 +57,9 @@ public class FormProRiegoActivity extends AppCompatActivity {
 
         api = ApiClient.getClient().create(ApiProRiego.class);
 
-        // Adaptador para los tipos de riego
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tiposRiego);
         autoCompleteTipoRiego.setAdapter(adapter);
 
-        // Recibir zona
         idZona = getIntent().getIntExtra("zona_id", -1);
         if (idZona == -1) {
             Toast.makeText(this, "No se recibió el ID de la zona", Toast.LENGTH_SHORT).show();
@@ -71,7 +67,6 @@ public class FormProRiegoActivity extends AppCompatActivity {
             return;
         }
 
-        // Si se recibe un programacion_id significa que estamos en modo edición
         programacionId = getIntent().getIntExtra("programacion_id", -1);
         if (programacionId != -1) {
             String descripcion = getIntent().getStringExtra("descripcion");
@@ -103,7 +98,6 @@ public class FormProRiegoActivity extends AppCompatActivity {
             btnAccion.setText("Crear");
         }
 
-        // Listeners
         etFechaInicio.setOnClickListener(v -> mostrarDateTimePicker(etFechaInicio));
         etFechaFin.setOnClickListener(v -> mostrarDateTimePicker(etFechaFin));
 
@@ -139,9 +133,7 @@ public class FormProRiegoActivity extends AppCompatActivity {
                         .atZone(ZoneId.systemDefault())
                         .toOffsetDateTime();
 
-                // Mostrar bonito
                 editText.setText(odt.format(DISPLAY_FORMATTER));
-                // Guardar ISO real en tag
                 editText.setTag(odt.format(ISO_FORMATTER));
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true);
 

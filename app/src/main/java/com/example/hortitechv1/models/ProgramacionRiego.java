@@ -13,10 +13,8 @@ public class ProgramacionRiego {
     private OffsetDateTime created_at;
     private OffsetDateTime updated_at;
 
-    // Constructor vacío
     public ProgramacionRiego() {}
 
-    // Constructor con parámetros
     public ProgramacionRiego(Integer id_pg_riego, String descripcion, String tipo_riego,
                              OffsetDateTime fecha_inicio, OffsetDateTime fecha_finalizacion,
                              OffsetDateTime created_at, OffsetDateTime updated_at,

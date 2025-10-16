@@ -14,8 +14,8 @@ retrofit = "2.9.0"
 threetenabp = "1.4.6"
 glide = "4.16.0"
 okhttp = "4.12.0"
-firebaseBom = "33.1.2" # <-- AÑADIDO
-googleGmsGoogleServices = "4.4.2" # <-- AÑADIDO
+firebaseBom = "33.1.2"
+googleGmsGoogleServices = "4.4.2"
 
 [libraries]
 github-glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
@@ -35,7 +35,6 @@ threetenabp = { module = "com.jakewharton.threetenabp:threetenabp", version.ref 
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 
-# --- LIBRERÍAS DE FIREBASE AÑADIDAS ---
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }

@@ -32,7 +32,6 @@ public interface ApiBitacora {
     @PATCH("api/bitacora/{id}/desarchivar")
     Call<ResponseBody> desarchivarBitacora(@Path("id") int id);
 
-    // Endpoints actualizados para referenciar a las clases internas
     @GET("api/persona")
     Call<List<Bitacora.Autor>> getAutores();
 
