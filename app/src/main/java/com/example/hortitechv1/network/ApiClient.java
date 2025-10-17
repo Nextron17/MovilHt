@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
     // Base URL
-    public static final String BASE_URL = "https://backendhortitech.onrender.com/";
+    public static final String BASE_URL = "https://hortitech-backend.onrender.com";
     private static Retrofit retrofit = null;
 
     public static Retrofit getClient() {
